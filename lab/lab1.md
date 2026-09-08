@@ -42,3 +42,29 @@ After running `uv add pillow`, `uv` created a virtual environment in `.venv`, ad
 
 These files provide the basic structure of a Python project managed by `uv`.
 
+
+
+\## Question 2
+
+What are the created files? What do you think they are used for? And which ones should be pushed to git?
+
+
+
+\### Answer
+
+Running `dvc init` created the DVC configuration files for the project.
+
+
+
+\- `.dvc/`: contains DVC project configuration and internal metadata.
+
+\- `.dvc/config`: stores project-level DVC configuration, such as remote storage settings. It is currently empty because no remote has been configured yet.
+
+\- `.dvc/.gitignore`: tells Git to ignore DVC internal files such as cache or temporary files that should not be versioned.
+
+\- `.dvcignore`: tells DVC which files or folders it should ignore when scanning and tracking data.
+
+
+
+The DVC configuration files that describe the project should be pushed to Git so that other developers can reproduce the same DVC setup. Internal cache files and temporary files should not be pushed to Git.
+
