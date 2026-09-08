@@ -170,4 +170,20 @@ The actual image is managed by DVC and was pushed to the DagsHub DVC remote. Dag
 This demonstrates the separation between Git and DVC:
 - Git/GitHub versions the code and DVC metadata.
 - DVC/DagsHub stores and versions the actual data.
+## Question 7
+Clone the GitHub repository in a new folder. What happens to the data? Which DVC command retrieves it?
 
+### Answer
+After cloning the GitHub repository into a new folder, the Git repository contains the source code and the `.dvc` metadata files, but the actual DVC-managed image is not downloaded automatically.
+
+The command used to retrieve the actual data is:
+
+`dvc pull`
+
+In this project, I used:
+
+`uv run dvc pull sample_data\4_531.jpg.dvc`
+
+After running the command, DVC fetched the file from the DagsHub remote and restored `sample_data/4_531.jpg` locally.
+
+This demonstrates that Git stores the DVC pointer, while DVC retrieves the actual data from remote storage.
