@@ -153,4 +153,21 @@ In this case, the dataset contains 16,643 files with a total size of approximate
 The `data.dvc` file acts as a small pointer to the actual dataset. Git tracks this file, while DVC stores and manages the real data.
 
 
+## Question 6
+Inspect the GitHub and DagsHub repositories after pushing the data. What do you observe?
+
+### Answer
+On GitHub, the actual image is not stored. GitHub contains the `.dvc` metadata file and the `.gitignore` file.
+
+For example, inside `sample_data`, GitHub contains:
+- `4_531.jpg.dvc`
+- `.gitignore`
+
+but it does not contain the actual `4_531.jpg` image.
+
+The actual image is managed by DVC and was pushed to the DagsHub DVC remote. DagsHub recognizes `4_531.jpg` as a DVC-managed file.
+
+This demonstrates the separation between Git and DVC:
+- Git/GitHub versions the code and DVC metadata.
+- DVC/DagsHub stores and versions the actual data.
 
