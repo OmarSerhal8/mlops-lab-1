@@ -100,5 +100,57 @@ The main configuration levels are:
 
 Credentials such as usernames, passwords, and access tokens should never be pushed to GitHub. Only non-secret configuration, such as the DVC remote URL and the default remote name, should be committed.
 
+\## Question 4
+
+Take a look at the `.gitignore` file. Explain what happened.
+
+
+
+\### Answer
+
+After running `dvc add data`, DVC automatically added `/data` to the `.gitignore` file.
+
+
+
+This prevents Git from tracking and pushing the actual dataset to GitHub. Instead, DVC manages the dataset separately, while Git only tracks the small DVC metadata file.
+
+
+
+Therefore, the large dataset is not stored directly in GitHub.
+
+\## Question 5
+
+Do you see a `.dvc` file? What does it contain?
+
+
+
+\### Answer
+
+Yes. DVC created a file named `data.dvc`.
+
+
+
+It contains metadata describing the tracked `data` directory, including:
+
+
+
+\- the MD5 hash used to identify this version of the data
+
+\- the total size of the dataset
+
+\- the number of files
+
+\- the hashing method
+
+\- the tracked path
+
+
+
+In this case, the dataset contains 16,643 files with a total size of approximately 1.19 GB.
+
+
+
+The `data.dvc` file acts as a small pointer to the actual dataset. Git tracks this file, while DVC stores and manages the real data.
+
 
 
