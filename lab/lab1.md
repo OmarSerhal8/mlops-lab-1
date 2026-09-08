@@ -186,4 +186,16 @@ In this project, I used:
 
 After running the command, DVC fetched the file from the DagsHub remote and restored `sample_data/4_531.jpg` locally.
 
-This demonstrates that Git stores the DVC pointer, while DVC retrieves the actual data from remote storage.
+This demonstrates that Git stores the DVC pointer, while DVC retrieves the actual data from remote storage.\
+## Question 8
+What happens when switching between Git commits and running `dvc checkout`?
+
+### Answer
+The `data.dvc` file is versioned by Git, so different Git commits can point to different versions of the dataset.
+
+When I checked out the older commit `9bab96e`, Git restored the older `data.dvc` pointer corresponding to the raw dataset version. After running `dvc checkout`, DVC updated the local data to match this version, so only `food11_raw` remained.
+
+When I returned to the `main` branch and ran `dvc checkout` again, DVC restored the latest data version containing `food11_raw`, `food11_processed`, and `food11_processed_mini`.
+
+Therefore, Git versions the DVC metadata/pointers, while DVC manages and restores the corresponding versions of the actual data.
+
