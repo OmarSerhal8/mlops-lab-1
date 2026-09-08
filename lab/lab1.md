@@ -68,3 +68,37 @@ Running `dvc init` created the DVC configuration files for the project.
 
 The DVC configuration files that describe the project should be pushed to Git so that other developers can reproduce the same DVC setup. Internal cache files and temporary files should not be pushed to Git.
 
+&#x20;
+
+\## Question 3
+
+Where are the credentials stored? What are the options other than `--global`? Should the credentials be pushed to GitHub?
+
+
+
+\### Answer
+
+DVC configuration can be stored at different levels.
+
+
+
+In this project, the DagsHub credentials were configured using the `--local` option, so they are stored in `.dvc/config.local`. This file is machine-specific and should not be committed to Git.
+
+
+
+The main configuration levels are:
+
+\- project: stored in `.dvc/config`
+
+\- local: stored in `.dvc/config.local`
+
+\- global: stored in the user's global DVC configuration
+
+\- system: applies system-wide
+
+
+
+Credentials such as usernames, passwords, and access tokens should never be pushed to GitHub. Only non-secret configuration, such as the DVC remote URL and the default remote name, should be committed.
+
+
+
