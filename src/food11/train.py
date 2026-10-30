@@ -1,13 +1,14 @@
 import argparse
+import os
 from pathlib import Path
 
-import mlflow
 import mlflow.pytorch
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
 from torchvision import datasets, models, transforms
 
+import mlflow
 
 # ============================================================
 # 1. READ COMMAND-LINE ARGUMENTS
@@ -266,7 +267,7 @@ def main():
 
     # Address of the MLflow tracking server
     mlflow.set_tracking_uri(
-        "http://127.0.0.1:5000"
+        os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
     )
 
     # Create/select the food11 experiment
@@ -340,7 +341,7 @@ def main():
         # FINAL TEST
         # ----------------------------------------------------
 
-        test_loss, test_accuracy = evaluate(
+        _test_loss, test_accuracy = evaluate(
             model,
             test_loader,
             criterion,
@@ -359,10 +360,11 @@ def main():
         # SAVE TRAINED MODEL AS AN MLFLOW ARTIFACT
         # ----------------------------------------------------
         mlflow.pytorch.log_model(
-    model,
-    name="model",
-    serialization_format="pickle",
-)
+            model,
+            name="model",
+            registered_model_name="food11",
+            serialization_format="pickle",
+        )
         
 
 

@@ -1,63 +1,58 @@
+"""Prepare Food-11 images for training and validation."""
+
 from pathlib import Path
+
 from PIL import Image
 
-CLASS_NAMES = {
-    "0": "Bread",
-    "1": "Dairy product",
-    "2": "Dessert",
-    "3": "Egg",
-    "4": "Fried food",
-    "5": "Meat",
-    "6": "Noodles-Pasta",
-    "7": "Rice",
-    "8": "Seafood",
-    "9": "Soup",
-    "10": "Vegetable-Fruit",
-}
+CLASSES = [
+    "Bread", "Dairy product", "Dessert", "Egg", "Fried food", "Meat",
+    "Noodles-Pasta", "Rice", "Seafood", "Soup", "Vegetable-Fruit",
+]
+CLASS_NAMES = {str(index): name for index, name in enumerate(CLASSES)}
 
 RAW_DIR = Path("data/food11_raw")
 PROCESSED_DIR = Path("data/food11_processed")
 MINI_DIR = Path("data/food11_processed_mini")
-
 IMAGE_SIZE = (128, 128)
 MINI_LIMIT = 100
 
 
-def process_split(split):
-    input_dir = RAW_DIR / split
+def category_from_filename(filename: str) -> str:
+    """Return the Food-11 category encoded by a filename such as ``3_120.jpg``."""
+    class_id = Path(filename).stem.split("_", 1)[0]
+    if class_id not in CLASS_NAMES:
+        raise ValueError(f"Unknown Food-11 class in filename: {filename}")
+    return CLASS_NAMES[class_id]
 
-    counts = {class_id: 0 for class_id in CLASS_NAMES}
+
+def resize_image(img: Image.Image, size: int = 128) -> Image.Image:
+    """Return an RGB square image of ``size`` pixels per side."""
+    return img.convert("RGB").resize((size, size))
+
+
+def process_split(split: str) -> None:
+    input_dir = RAW_DIR / split
+    counts = {class_name: 0 for class_name in CLASSES}
 
     for image_path in input_dir.glob("*.jpg"):
-        class_id = image_path.stem.split("_")[0]
-        class_name = CLASS_NAMES[class_id]
-
+        class_name = category_from_filename(image_path.name)
         output_dir = PROCESSED_DIR / split / class_name
         mini_output_dir = MINI_DIR / split / class_name
-
         output_dir.mkdir(parents=True, exist_ok=True)
         mini_output_dir.mkdir(parents=True, exist_ok=True)
 
         with Image.open(image_path) as image:
-            image = image.convert("RGB")
-            image = image.resize(IMAGE_SIZE)
-
-            output_path = output_dir / image_path.name
-            image.save(output_path)
-
-            if counts[class_id] < MINI_LIMIT:
-                mini_output_path = mini_output_dir / image_path.name
-                image.save(mini_output_path)
-                counts[class_id] += 1
+            resized = resize_image(image)
+            resized.save(output_dir / image_path.name)
+            if counts[class_name] < MINI_LIMIT:
+                resized.save(mini_output_dir / image_path.name)
+                counts[class_name] += 1
 
 
-def main():
-    splits = ["training", "evaluation", "validation"]
-
-    for split in splits:
+def main() -> None:
+    for split in ("training", "evaluation", "validation"):
         print(f"Processing {split}...")
         process_split(split)
-
     print("Processing complete.")
 
 
