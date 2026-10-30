@@ -1,16 +1,5 @@
 # Lab 5 — CI/CD with GitHub Actions
 
-## Deliverables
-
-- `.github/workflows/ci.yml` runs lint, unit tests, a Docker health smoke test, and a GHCR push for `main` commits.
-- `src/food11/data.py` has pure helpers; `serve.py` can start with `SKIP_MODEL=1` and accepts a fake model in API tests.
-- `tests/fixtures/bread.jpg` is a small Git-tracked fixture. Tests do not need DVC data, MLflow, or a GPU.
-- `validate_data.py` checks the processed data contract. `scripts/repair_mini.py` replaced 43 pre-existing cross-split duplicate images with unique images from their original full-data splits. The mini dataset now passes all five checks.
-- The updated `data.dvc` pointer was pushed to the configured DagsHub S3 remote; `dvc status -c -r dagshub-s3` reported the cache and remote in sync.
-- `promote.py` compares a candidate's test accuracy to the champion plus two standard errors, records tags, and assigns `champion` or `challenger`.
-
-Local verification: `ruff` passed, 8 tests passed, and all five mini-data checks passed. A real-model API request against the local MLflow server returned `/health` 200 and `/predict` 200 with `Bread` at confidence `0.9983` for the committed fixture.
-
 ## Question 1 — Why avoid loading the real model in unit tests?
 
 The test could fail because MLflow is offline, credentials or network access are unavailable, the model alias or artifacts are missing, or the model takes too long to download. These are infrastructure failures even if the API code is correct. A real model also makes a small unit test slow and dependent on changing registry state.
@@ -25,7 +14,7 @@ The `cross-split duplicates` check failed with exit code 1 when `training/Bread/
 
 ## Question 4 — Where can data validation run?
 
-Run it locally just after `dvc pull` and before training. It can also run in a dedicated data CI job on a self-hosted runner with access to the DVC remote, or on a cloud runner with DVC credentials provided as secrets. The code-only CI jobs intentionally do not fetch the full dataset.
+Run it locally just after `dvc pull` and before training. It can also run in a dedicated CI job after that job pulls the data from DVC using credentials stored as GitHub secrets.
 
 ## Question 5 — Why does `smoke` use `needs: test`?
 
@@ -49,7 +38,7 @@ Only the image publishing job needs `contents: read` and `packages: write`. A co
 
 ## Question 9 — What did the broken PR show?
 
-[PR #1](https://github.com/OmarSerhal8/mlops-lab-1/pull/1) initially had a deliberately wrong class assertion. Both `test` checks failed, `smoke` was skipped, and GitHub reported `mergeStateStatus: BLOCKED`. The rule requires a pull request and successful `test` and `smoke` checks on `main`. This gives the team a shared, enforced check rather than relying on every developer to remember local commands. The assertion was then fixed and pushed again.
+[PR #1](https://github.com/OmarSerhal8/mlops-lab-1/pull/1) initially had a deliberately wrong class assertion. Both `test` checks failed, `smoke` was skipped, and GitHub reported `mergeStateStatus: BLOCKED`, so the protected branch could not be merged normally. The rule requires a pull request and successful `test` and `smoke` checks on `main`. This gives the team a shared, enforced check rather than relying on every developer to remember local commands. The assertion was then fixed and pushed again.
 
 ## Question 10 — Promotion decisions
 
@@ -74,13 +63,13 @@ A training job on a self-hosted runner that can reach the local MLflow server co
 
 ```mermaid
 flowchart LR
-    A[git push] --> B[CI test: lint and unit tests]
-    B --> C[CI smoke: build and health probe]
-    C -->|main only| D[CI push image to GHCR with commit SHA]
-    D --> E[Human or deployment system pulls exact SHA]
-    E --> F[Start container]
-    G[Train and register model] --> H[promote.py quality gate]
-    H --> I[MLflow champion alias]
+    A[Human: git push] --> B[Automatic: lint and unit tests]
+    B --> C[Automatic: build and health probe]
+    C -->|main only| D[Automatic: publish image with commit SHA]
+    D --> E[Human: pull exact image SHA]
+    E --> F[Human: start container]
+    G[Human: train and register model] --> H[Human: run promote.py]
+    H --> I[Automatic gate: set MLflow champion alias]
     I --> F
     F --> J[Load champion model at startup]
 ```
