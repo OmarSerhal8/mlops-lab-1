@@ -35,6 +35,8 @@ When a test fails, GitHub skips `smoke`; the deliberately failing PR demonstrate
 
 The first full `main` run took 5 minutes 18 seconds, from 08:36:44 to 08:42:02 UTC. `test` took 23 seconds, `smoke` 46 seconds, and the GHCR `push` job 4 minutes.
 
+The next full `main` run after merging the lab PR took 1 minute 36 seconds (08:53:01–08:54:37 UTC). Its `push` job fell to 15 seconds. Buildx reused layers from the GitHub Actions cache instead of rebuilding and exporting the large dependency layers. `test` and `smoke` remained about the same duration.
+
 For a like-for-like comparison without the main-only push, the first green branch run took 1 minute 17 seconds (08:40:44–08:42:01 UTC). An empty `ci` commit triggered a second branch run that took 1 minute 18 seconds (08:44:09–08:45:27 UTC). `uv sync --frozen` dropped from about 5 to 4 seconds, consistent with the enabled uv cache, but the one-second change is too small to separate from runner variation. `smoke` took 46 then 48 seconds because each fresh runner built the Docker image again; there was no meaningful whole-run speedup.
 
 ## Question 7 — Why tag the image with the commit SHA?
