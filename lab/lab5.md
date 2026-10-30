@@ -6,7 +6,10 @@
 - `src/food11/data.py` has pure helpers; `serve.py` can start with `SKIP_MODEL=1` and accepts a fake model in API tests.
 - `tests/fixtures/bread.jpg` is a small Git-tracked fixture. Tests do not need DVC data, MLflow, or a GPU.
 - `validate_data.py` checks the processed data contract. `scripts/repair_mini.py` replaced 43 pre-existing cross-split duplicate images with unique images from their original full-data splits. The mini dataset now passes all five checks.
+- The updated `data.dvc` pointer was pushed to the configured DagsHub S3 remote; `dvc status -c -r dagshub-s3` reported the cache and remote in sync.
 - `promote.py` compares a candidate's test accuracy to the champion plus two standard errors, records tags, and assigns `champion` or `challenger`.
+
+Local verification: `ruff` passed, 8 tests passed, and all five mini-data checks passed. A real-model API request against the local MLflow server returned `/health` 200 and `/predict` 200 with `Bread` at confidence `0.9983` for the committed fixture.
 
 ## Question 1 — Why avoid loading the real model in unit tests?
 
